@@ -77,6 +77,7 @@ export const bugAPI = {
   // Comments & Engagement
   addComment: (bugId, text, parentId = null) => api.post(`/bugs/${bugId}/comments`, { text, parentId }),
   getComments: (bugId) => api.get(`/bugs/${bugId}/comments`),
+  voteOnComment: (bugId, commentId) => api.post(`/bugs/${bugId}/comments/${commentId}/vote`),
   voteOnBug: (bugId, type) => api.post(`/bugs/${bugId}/vote`, { type }),
   markAsSolved: (bugId, commentId) => api.put(`/bugs/${bugId}/solve`, { commentId }),
 

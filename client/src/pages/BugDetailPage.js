@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { bugAPI } from '../utils/api';
 import '../App.css';
 
-function CommentThread({ comment, allComments, onReply, isDark, updating, bugAuthorId, isSolved, acceptedAnswerId, onMarkSolved }) {
+function CommentThread({ comment, allComments, onReply, onVoteComment, isDark, updating, bugAuthorId, isSolved, acceptedAnswerId, onMarkSolved }) {
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [collapsed, setCollapsed] = useState(false);
@@ -76,6 +76,13 @@ function CommentThread({ comment, allComments, onReply, isDark, updating, bugAut
               <button onClick={() => setIsReplying(!isReplying)} style={{color: isDark ? '#60a5fa' : '#2563eb'}} className="hover:underline">
                 💬 Reply
               </button>
+              <button
+                onClick={() => onVoteComment(comment._id)}
+                style={{color: isDark ? '#9ca3af' : '#6b7280'}}
+                className="hover:text-indigo-500 hover:underline"
+              >
+                ⬆ Useful ({comment.score || 0})
+              </button>
               {children.length > 0 && (
                 <button onClick={() => setCollapsed(true)} style={{color: isDark ? '#9ca3af' : '#6b7280'}} className="hover:underline">
                   [−] Collapse thread
@@ -124,6 +131,7 @@ function CommentThread({ comment, allComments, onReply, isDark, updating, bugAut
                     comment={child} 
                     allComments={allComments} 
                     onReply={onReply} 
+                    onVoteComment={onVoteComment}
                     isDark={isDark} 
                     updating={updating}
                     bugAuthorId={bugAuthorId}
@@ -215,6 +223,18 @@ function BugDetailPage({ isDark = false }) {
       setMessage({ type: 'error', text: err.message });
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleVoteComment = async (commentId) => {
+    try {
+      const response = await bugAPI.voteOnComment(bugId, commentId);
+      const nextScore = response.data.score;
+      setComments((prev) => prev.map((comment) => (
+        comment._id === commentId ? { ...comment, score: nextScore } : comment
+      )));
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.error || err.message });
     }
   };
 
@@ -670,6 +690,7 @@ function BugDetailPage({ isDark = false }) {
                         comment={comment}
                         allComments={comments}
                         onReply={handlePostReply}
+                        onVoteComment={handleVoteComment}
                         isDark={isDark}
                         updating={updating}
                         bugAuthorId={isOwner ? bug.userId : null}

@@ -1,357 +1,113 @@
-# BugRadar - Intelligent Bug Tracking System
+# BugRadar
 
-An intelligent bug tracking system with root cause prediction using TF-IDF similarity detection and K-means clustering.
+A community-driven bug resolution platform with AI-assisted debugging.
 
-## 🎯 Project Overview
+## Problem Statement
 
-BugRadar is a full-stack application that helps teams:
-- Report and track bugs efficiently
-- Detect similar bugs using machine learning algorithms
-- Identify root causes through clustering analysis
-- Manage bug lifecycle with status tracking
+Traditional bug trackers are good for logging issues, but weak for collaborative debugging. Teams need a public feed where developers can discuss, vote, and converge on proven solutions quickly.
 
-**Tech Stack:**
-- **Frontend:** React 18 + Tailwind CSS
-- **Backend:** Node.js + Express.js
-- **Database:** MongoDB
-- **ML Libraries:** Natural.js (tokenization), ML.js (clustering)
+## Solution
 
-## 📁 Project Structure
+BugRadar combines Reddit-style issue discussions with structured bug reporting and AI assistance. Users can post bugs, vote, discuss fixes, and mark the best solution while AI helps with tags, likely fixes, and duplicate detection.
 
-```
+## Features
+
+- Public bug feed with card-based UI
+- Structured bug submission (title, description, tags, steps, severity, visibility)
+- AI-assisted posting workflow:
+  - auto tag suggestions
+  - likely fix suggestions
+  - possible duplicate bug detection
+- Comments and threaded replies per bug
+- Mark comment as best solution
+- Voting:
+  - upvote/downvote bugs
+  - upvote useful solutions/comments
+- Sorting options:
+  - latest
+  - most upvoted
+  - most solved
+- Profile, authentication, and notifications
+
+## Tech Stack
+
+- Frontend: React, React Router, Axios, Tailwind CSS
+- Backend: Node.js, Express
+- Database: MongoDB, Mongoose
+- AI/ML:
+  - NVIDIA-hosted LLM endpoint for AI chat
+  - keyword/rule-based debug assistance
+  - TF-IDF similarity utilities for duplicate detection
+
+## Project Structure
+
+```bash
 BugRadar/
-├── client/                    # React Frontend
-│   ├── public/
-│   │   └── index.html
-│   ├── src/
-│   │   ├── components/       # Reusable components
-│   │   ├── pages/           # Page components
-│   │   ├── utils/           # API utilities
-│   │   ├── App.js           # Main app component
-│   │   ├── App.css          # Styling
-│   │   └── index.js         # Entry point
-│   └── package.json
-└── server/                    # Node.js Backend
-    ├── src/
-    │   ├── models/          # MongoDB schemas
-    │   ├── controllers/     # Business logic
-    │   ├── routes/          # API routes
-    │   ├── utils/           # Helper functions
-    │   └── index.js         # Server entry
-    ├── package.json
-    └── .env.example
+├── client/                # Frontend (UI, pages, components, API client)
+├── server/                # Backend (routes, controllers, models, middleware)
+├── docs/                  # Screenshots and demo visuals
+├── README.md
+└── .gitignore
 ```
 
-## 🚀 Getting Started
+## Setup
 
-### Prerequisites
-- Node.js (v16+)
-- MongoDB (local or Atlas)
-- npm or yarn
+### 1) Backend
 
-### Backend Setup
-
-1. **Navigate to server directory:**
 ```bash
 cd server
-```
-
-2. **Install dependencies:**
-```bash
 npm install
-```
-
-3. **Create .env file:**
-```bash
 cp .env.example .env
-# Edit .env with your MongoDB URI
+npm run dev
 ```
 
-4. **Start the backend:**
-```bash
-npm run dev    # Development with nodemon
-npm start      # Production
+Required `server/.env` keys:
+
+```env
+MONGO_URI=
+PORT=5000
+NODE_ENV=development
+JWT_SECRET=
+NVIDIA_API_KEY=
 ```
 
-The server runs on `http://localhost:5000`
+### 2) Frontend
 
-### Frontend Setup
-
-1. **Navigate to client directory:**
 ```bash
 cd client
-```
-
-2. **Install dependencies:**
-```bash
 npm install
-```
-
-3. **Start the frontend:**
-```bash
 npm start
 ```
 
-The app opens at `http://localhost:3000`
+Optional `client/.env`:
 
-## 📚 Core Features
-
-### 1. Bug Reporting System
-- Create new bug reports with:
-  - Title and description
-  - Steps to reproduce
-  - Severity levels (low, medium, high, critical)
-  - Custom tags
-  - Reporter name
-
-### 2. Bug Tracking Dashboard
-- View all bugs with filtering options
-- Filter by status and severity
-- Search by keywords
-- Sort by creation date or priority
-- See bug details and update status
-
-### 3. Similarity Detection
-**Algorithm: TF-IDF (Term Frequency-Inverse Document Frequency)**
-
-Components:
-- Tokenization: Splits text into words
-- Stop word removal: Filters common words (the, is, etc.)
-- TF calculation: Frequency of terms in each document
-- IDF calculation: Importance of terms across all documents
-- Cosine similarity: Measures semantic similarity between bugs
-
-**Process:**
-1. When a bug is created, its description is analyzed
-2. Compared against all existing bug descriptions
-3. Top 3 similar bugs are returned
-4. Similarity scores displayed as percentages
-
-Example:
-```javascript
-// Bug 1: "Login button not working on mobile"
-// Bug 2: "Sign in fails on Android"
-// Similarity Score: 78% (similar issues)
-```
-
-### 4. Root Cause Suggestion
-**Algorithm: K-means Clustering**
-
-Components:
-- **Vector creation:** Converts text to TF-IDF vectors
-- **Clustering:** Groups similar bugs into clusters
-- **Analysis:** Finds common tags and keywords in each cluster
-- **Suggestion:** Generates root cause insights
-
-**Process:**
-1. All bug descriptions are vectorized
-2. K-means algorithm groups similar bugs
-3. Common tags and keywords analyzed per cluster
-4. Root cause suggestions generated
-
-Example:
-```
-Cluster 1 (5 bugs):
-- Common tags: ui, mobile, button
-- Related to: animation, performance
-- Root Cause: Mobile UI rendering issues
-```
-
-### 5. REST APIs
-
-**Bug CRUD:**
-```
-POST   /api/bugs              # Create bug
-GET    /api/bugs              # Get all bugs (with filters)
-GET    /api/bugs/:bugId       # Get bug details
-PUT    /api/bugs/:bugId       # Update bug
-DELETE /api/bugs/:bugId       # Delete bug
-```
-
-**Analysis Endpoints:**
-```
-GET    /api/bugs/:bugId/similar           # Find similar bugs
-GET    /api/bugs/analysis/cluster         # Clustering analysis
-GET    /api/bugs/stats/dashboard          # Dashboard statistics
-GET    /api/bugs/search                   # Search bugs
-```
-
-**Query Parameters:**
-```
-GET /api/bugs?status=open&severity=high   # Filter by status/severity
-GET /api/bugs/:bugId/similar?topN=5       # Get top N similar bugs
-GET /api/bugs/analysis/cluster?numClusters=4  # Specify cluster count
-```
-
-## 🧠 Machine Learning Implementation
-
-### TF-IDF Vectorization
-```javascript
-// Example: Bug description vectorization
-Description: "Login button not working on mobile devices"
-
-Tokenized: ["login", "button", "working", "mobile", "devices"]
-TF values: {login: 0.2, button: 0.2, working: 0.2, mobile: 0.2, devices: 0.2}
-IDF values: {login: 2.1, button: 2.3, working: 1.8, mobile: 1.9, devices: 2.0}
-TF-IDF: {login: 0.42, button: 0.46, working: 0.36, mobile: 0.38, devices: 0.40}
-```
-
-### Cosine Similarity
-```
-Similarity = (A · B) / (||A|| × ||B||)
-
-where:
-- A · B = sum of products of corresponding elements
-- ||A|| = magnitude of vector A
-- ||B|| = magnitude of vector B
-
-Result: 0 (no similarity) to 1 (identical)
-```
-
-### K-means Clustering
-```
-Process:
-1. Initialize K random centroids
-2. Assign each bug to nearest centroid
-3. Recalculate centroids as mean of assigned points
-4. Repeat until convergence
-
-Example with K=3:
-Cluster 1: Auth-related bugs (5 issues)
-Cluster 2: UI/UX bugs (8 issues)
-Cluster 3: Performance bugs (3 issues)
-```
-
-## 🔒 Data Schema
-
-### Bug Document
-```javascript
-{
-  _id: ObjectId,
-  title: String,                    // Bug title
-  description: String,              // Detailed description
-  stepsToReproduce: [String],       // Step-by-step reproduction
-  severity: String,                 // low|medium|high|critical
-  status: String,                   // open|in-progress|resolved|closed
-  tags: [String],                   // Custom tags for categorization
-  createdBy: String,                // Reporter name
-  assignedTo: String,               // Assigned developer
-  vectorEmbedding: [Number],        // TF-IDF vector (optional)
-  relatedBugs: [ObjectId],          // Reference to similar bugs
-  rootCauseSuggestion: String,      // AI-generated suggestion
-  clusterLabel: Number,             // Cluster ID from K-means
-  createdAt: Date,
-  updatedAt: Date
-}
-```
-
-## 🔧 Configuration
-
-### Environment Variables (.env)
-
-**Backend:**
-```
-MONGO_URI=mongodb://localhost:27017/bugradar
-PORT=5000
-NODE_ENV=development
-```
-
-**Frontend:**
-```
+```env
 REACT_APP_API_URL=http://localhost:5000/api
 ```
 
-## 📊 Algorithm Performance
+## Screenshots
 
-### TF-IDF Similarity
-- **Time Complexity:** O(n×m×k) where n=bugs, m=avg tokens, k=unique tokens
-- **Space Complexity:** O(n×k)
-- **Suitable for:** Real-time similarity detection (< 1000 bugs)
+Add screenshots in `docs/` and reference them here:
 
-### K-means Clustering
-- **Time Complexity:** O(i×n×k×d) where i=iterations, n=docs, k=clusters, d=dimensions
-- **Space Complexity:** O(n×d)
-- **Suitable for:** Periodic analysis (recommended: weekly/monthly)
+- `docs/feed.png` - Public bug feed
+- `docs/create-bug-ai-assist.png` - AI-assisted bug posting
+- `docs/bug-detail-comments.png` - Solutions and best-answer flow
 
-## 🚀 Scaling Improvements
+## API Highlights
 
-For large datasets (10,000+ bugs):
-1. **Implement caching:** Cache TF-IDF vectors
-2. **Use approximate nearest neighbors:** LSH for similarity search
-3. **Implement clustering as async job:** Use job queues (Bull, RabbitMQ)
-4. **Database indexes:** Index tags, severity, status fields
-5. **Frontend pagination:** Implement infinite scroll
+- `GET /api/bugs` - bug feed with filtering/sorting
+- `POST /api/bugs` - create bug with AI assistance in response
+- `POST /api/bugs/suggest` - AI-guided bug draft suggestions
+- `POST /api/bugs/:bugId/vote` - upvote/downvote bug
+- `GET /api/bugs/:bugId/comments` - fetch comments
+- `POST /api/bugs/:bugId/comments` - add comment/reply
+- `POST /api/bugs/:bugId/comments/:commentId/vote` - upvote useful solution
+- `PUT /api/bugs/:bugId/solve` - mark best solution
 
-## 🧪 Testing
+## Future Improvements
 
-### Sample API Requests
-
-**Create a bug:**
-```bash
-curl -X POST http://localhost:5000/api/bugs \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Login fails on Firefox",
-    "description": "Users cannot log in using Firefox browser",
-    "severity": "high",
-    "tags": ["browser", "auth"],
-    "createdBy": "john@example.com"
-  }'
-```
-
-**Get similar bugs:**
-```bash
-curl http://localhost:5000/api/bugs/[bugId]/similar?topN=5
-```
-
-**Analyze clusters:**
-```bash
-curl http://localhost:5000/api/bugs/analysis/cluster?numClusters=4
-```
-
-## 📈 Optional Enhancements
-
-- [ ] JWT Authentication & Role-based access
-- [ ] GitHub issue import/sync
-- [ ] WebSocket real-time updates
-- [ ] Advanced reporting & analytics
-- [ ] Email notifications
-- [ ] Attachment support
-- [ ] Comments & discussions
-- [ ] SLA tracking
-
-## 🛠️ Development
-
-### Project Demonstrates:
-✅ **Data Structures & Algorithms**
-- Tokenization and text processing
-- Vector space models
-- Similarity metrics (cosine similarity)
-- Clustering algorithms (K-means)
-- Graph analysis (bug relationships)
-
-✅ **Backend Architecture**
-- REST API design
-- MongoDB document modeling
-- Controller-Route-Model pattern
-- Business logic separation
-- Error handling
-
-✅ **Frontend Development**
-- React hooks & state management
-- Component composition
-- Responsive design with Tailwind CSS
-- API integration
-- Form handling
-
-## 📝 License
-
-MIT License
-
-## 👤 Author
-
-Created as a demonstration of full-stack development with ML integration.
-
----
-
-**Happy bug tracking! 🐛**
+- Reputation leaderboard and badges
+- Pagination/infinite scrolling for large feeds
+- Real-time updates with websockets
+- Rich markdown editor and attachments
+- Better semantic duplicate detection with vector search

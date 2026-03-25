@@ -32,10 +32,16 @@ async function createBug(req, res) {
     // Find similar bugs
     const existingBugs = await Bug.find({ _id: { $ne: savedBug._id } }).lean();
     const similarBugs = findSimilarBugs(description, existingBugs, 3);
+    const improvementSuggestions = await buildSubmissionInsights({
+      title,
+      description,
+      tags: tags || [],
+    });
     
     res.status(201).json({
       bug: savedBug,
       similarBugs,
+      aiAssistance: improvementSuggestions,
       message: 'Bug created successfully',
     });
   } catch (error) {
@@ -48,7 +54,7 @@ async function createBug(req, res) {
  */
 async function getAllBugs(req, res) {
   try {
-    const { status, severity, sortBy = 'createdAt', order = 'desc', q, tag, solved } = req.query;
+    const { status, severity, sortBy = 'latest', order = 'desc', q, tag, solved } = req.query;
 
     let filter = {};
     if (status) filter.status = status;
@@ -91,8 +97,9 @@ async function getAllBugs(req, res) {
     }
 
     let sortObj = { createdAt: -1 };
-    if (sortBy === 'top') sortObj = { score: -1 };
-    else if (sortBy === 'new') sortObj = { createdAt: -1 };
+    if (sortBy === 'most-upvoted' || sortBy === 'top') sortObj = { score: -1, createdAt: -1 };
+    else if (sortBy === 'latest' || sortBy === 'new') sortObj = { createdAt: -1 };
+    else if (sortBy === 'most-solved' || sortBy === 'solved') sortObj = { isSolved: -1, updatedAt: -1, score: -1 };
     else if (sortBy === 'hot') sortObj = { score: -1, updatedAt: -1 };
     else sortObj = { [sortBy]: order === 'asc' ? 1 : -1 };
 
@@ -414,7 +421,7 @@ async function addComment(req, res) {
 async function getComments(req, res) {
   try {
     const { bugId } = req.params;
-    const comments = await Comment.find({ bug: bugId }).sort({ createdAt: -1 });
+    const comments = await Comment.find({ bug: bugId }).sort({ isSolution: -1, score: -1, createdAt: -1 });
     res.json(comments);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -526,6 +533,36 @@ async function markAsSolved(req, res) {
     res.json({ message: bug.isSolved ? 'Marked as solved' : 'Unmarked as solved', bug });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+}
+
+/**
+ * Vote on a comment/solution (upvote only)
+ */
+async function voteOnComment(req, res) {
+  try {
+    const { bugId, commentId } = req.params;
+    const userId = req.user.id;
+
+    const bug = await Bug.findById(bugId);
+    if (!bug) return res.status(404).json({ error: 'Post not found' });
+
+    const comment = await Comment.findOne({ _id: commentId, bug: bugId });
+    if (!comment) return res.status(404).json({ error: 'Comment not found' });
+
+    const hasUpvoted = comment.upvotedBy.some((id) => id.toString() === userId.toString());
+    if (hasUpvoted) {
+      comment.upvotedBy.pull(userId);
+      comment.score -= 1;
+    } else {
+      comment.upvotedBy.push(userId);
+      comment.score += 1;
+    }
+
+    await comment.save();
+    return res.json({ commentId: comment._id, score: comment.score });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 }
 
@@ -719,38 +756,7 @@ async function suggestBugImprovements(req, res) {
     const { title = '', description = '', tags = [] } = req.body;
     if (!title && !description) return res.status(400).json({ error: 'Title or description is required' });
 
-    const suggestions = [];
-
-    // Title quality check
-    const words = title.trim().split(/\s+/);
-    if (words.length < 4) {
-      suggestions.push({ type: 'title', text: 'Your title is very short. Include where the bug happens, e.g. "Login button unresponsive on mobile Safari"' });
-    }
-    if (!/\b(on|in|when|after|during|with|error|fail|not|unable|cannot|broken)\b/i.test(title)) {
-      suggestions.push({ type: 'title', text: 'Try adding context words like "when", "on", "after", or "not working" to make the title more specific' });
-    }
-
-    // Description quality check
-    if (description.length < 50) {
-      suggestions.push({ type: 'description', text: 'Add more detail — what did you expect to happen, and what actually happened?' });
-    }
-    if (!/expected|expect|should|supposed/i.test(description)) {
-      suggestions.push({ type: 'description', text: 'Include the expected behavior: "Expected: X, Actual: Y"' });
-    }
-    if (!/step|click|open|navigate|tap|press|go to/i.test(description)) {
-      suggestions.push({ type: 'steps', text: 'Missing reproduction steps — add numbered steps like "1. Open app, 2. Click login, 3. Error appears"' });
-    }
-
-    // Tag suggestions based on keywords
-    const combined = `${title} ${description}`.toLowerCase();
-    const suggestedTags = [];
-    if (/mobile|ios|android|safari|touch/i.test(combined) && !tags.includes('mobile')) suggestedTags.push('mobile');
-    if (/login|auth|password|jwt|session/i.test(combined) && !tags.includes('auth')) suggestedTags.push('auth');
-    if (/api|endpoint|fetch|axios|cors|http/i.test(combined) && !tags.includes('api')) suggestedTags.push('api');
-    if (/button|click|form|ui|layout|css/i.test(combined) && !tags.includes('ui')) suggestedTags.push('ui');
-    if (/database|mongo|query|save/i.test(combined) && !tags.includes('database')) suggestedTags.push('database');
-    if (/slow|performance|lag|memory/i.test(combined) && !tags.includes('performance')) suggestedTags.push('performance');
-    if (/crash|error|null|undefined/i.test(combined) && !tags.includes('error')) suggestedTags.push('error');
+    const { suggestions, suggestedTags, possibleFixes } = await buildSubmissionInsights({ title, description, tags });
 
     // Duplicate check via TF-IDF
     const allBugs = await Bug.find({ visibility: 'public' }).select('title description _id');
@@ -762,7 +768,7 @@ async function suggestBugImprovements(req, res) {
       return { id: bug._id, title: bug.title, similarity: Math.round(m.similarity * 100) };
     });
 
-    res.json({ suggestions, suggestedTags, possibleDuplicates });
+    res.json({ suggestions, suggestedTags, possibleFixes, possibleDuplicates });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -783,7 +789,44 @@ module.exports = {
   getComments,
   voteOnBug,
   markAsSolved,
+  voteOnComment,
   chatWithAI,
   suggestBugImprovements,
 };
+
+async function buildSubmissionInsights({ title = '', description = '', tags = [] }) {
+  const suggestions = [];
+  const words = title.trim().split(/\s+/).filter(Boolean);
+
+  if (words.length < 4) {
+    suggestions.push({ type: 'title', text: 'Your title is very short. Include where the bug happens, e.g. "Login button unresponsive on mobile Safari"' });
+  }
+  if (!/\b(on|in|when|after|during|with|error|fail|not|unable|cannot|broken)\b/i.test(title)) {
+    suggestions.push({ type: 'title', text: 'Try adding context words like "when", "on", "after", or "not working" to make the title more specific' });
+  }
+  if (description.length < 50) {
+    suggestions.push({ type: 'description', text: 'Add more detail — what did you expect to happen, and what actually happened?' });
+  }
+  if (!/expected|expect|should|supposed/i.test(description)) {
+    suggestions.push({ type: 'description', text: 'Include the expected behavior: "Expected: X, Actual: Y"' });
+  }
+  if (!/step|click|open|navigate|tap|press|go to/i.test(description)) {
+    suggestions.push({ type: 'steps', text: 'Missing reproduction steps — add numbered steps like "1. Open app, 2. Click login, 3. Error appears"' });
+  }
+
+  const combined = `${title} ${description}`.toLowerCase();
+  const suggestedTags = [];
+  if (/mobile|ios|android|safari|touch/i.test(combined) && !tags.includes('mobile')) suggestedTags.push('mobile');
+  if (/login|auth|password|jwt|session/i.test(combined) && !tags.includes('auth')) suggestedTags.push('auth');
+  if (/api|endpoint|fetch|axios|cors|http/i.test(combined) && !tags.includes('api')) suggestedTags.push('api');
+  if (/button|click|form|ui|layout|css/i.test(combined) && !tags.includes('ui')) suggestedTags.push('ui');
+  if (/database|mongo|query|save/i.test(combined) && !tags.includes('database')) suggestedTags.push('database');
+  if (/slow|performance|lag|memory/i.test(combined) && !tags.includes('performance')) suggestedTags.push('performance');
+  if (/crash|error|null|undefined/i.test(combined) && !tags.includes('error')) suggestedTags.push('error');
+
+  const aiAnalysis = analyzeContext({ title, description, tags });
+  const possibleFixes = aiAnalysis.fixes.slice(0, 3);
+
+  return { suggestions, suggestedTags, possibleFixes };
+}
 
