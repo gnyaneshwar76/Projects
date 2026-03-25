@@ -244,7 +244,6 @@ function BugListPage({ isDark = false }) {
   const suggestions = getSuggestions(searchInput, allTags);
   const hasFilters = searchInput || activeTag || solvedFilter;
 
-  const cardBg = isDark ? 'bg-[#1a1a1b] border-[#343536]' : 'bg-white border-gray-200';
   const inputBg = isDark ? 'bg-[#272729] border-[#343536] text-[#d7dadc] placeholder-[#818384]' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400';
 
   return (

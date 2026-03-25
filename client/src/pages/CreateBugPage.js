@@ -212,7 +212,6 @@ function CreateBugPage({ isDark = false }) {
   };
 
   const sev = SEVERITY_INFO[formData.severity];
-  const parsedTags = formData.tags.split(',').map(tag => tag.trim()).filter(Boolean);
 
   useEffect(() => {
     const title = formData.title.trim();
@@ -228,6 +227,7 @@ function CreateBugPage({ isDark = false }) {
     const timer = setTimeout(async () => {
       try {
         setAnalyzingDraft(true);
+        const parsedTags = formData.tags.split(',').map((item) => item.trim()).filter(Boolean);
         const response = await bugAPI.suggestBugImprovements(title, description, parsedTags);
         setDraftSuggestions(response.data?.suggestions || []);
         setAiSuggestedTags(response.data?.suggestedTags || []);
@@ -244,6 +244,7 @@ function CreateBugPage({ isDark = false }) {
   }, [formData.title, formData.description, formData.tags]);
 
   const addSuggestedTag = (tag) => {
+    const parsedTags = formData.tags.split(',').map((item) => item.trim()).filter(Boolean);
     if (parsedTags.includes(tag)) return;
     const nextTags = [...parsedTags, tag];
     setFormData((prev) => ({ ...prev, tags: nextTags.join(', ') }));
