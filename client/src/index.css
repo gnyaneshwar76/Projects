@@ -1,0 +1,213 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Light Admin Dashboard Theme */
+:root {
+  --color-critical: #dc2626;
+  --color-high: #ea580c;
+  --color-medium: #f59e0b;
+  --color-low: #10b981;
+  --color-open: #ef4444;
+  --color-in-progress: #f59e0b;
+  --color-resolved: #10b981;
+  --color-closed: #6b7280;
+  
+  /* Light Mode (Default) */
+  --bg-primary: #f3f4f6;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f9fafb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+}
+
+html.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --border-color: #475569;
+}
+
+* {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply font-sans;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Clean Admin Card Components */
+.glass-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.glass {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+
+.glass-button {
+  @apply px-6 py-2.5 font-semibold cursor-pointer hover:scale-105 active:scale-98 transition-all;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.glass-button-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+}
+
+.glass-button-primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.glass-button-secondary {
+  @apply glass-button;
+}
+
+.glass-button-secondary:hover {
+  background: var(--bg-tertiary);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.loading-skeleton {
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--border-color) 50%, var(--bg-tertiary) 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Severity badges */
+.badge-critical {
+  @apply px-3 py-1 rounded-full text-sm font-semibold;
+  background: rgba(220, 38, 38, 0.15);
+  color: var(--color-critical);
+}
+
+.dark .badge-critical {
+  background: rgba(220, 38, 38, 0.25);
+}
+
+.badge-high {
+  @apply px-3 py-1 rounded-full text-sm font-semibold;
+  background: rgba(234, 88, 12, 0.15);
+  color: var(--color-high);
+}
+
+.dark .badge-high {
+  background: rgba(234, 88, 12, 0.25);
+}
+
+.badge-medium {
+  @apply px-3 py-1 rounded-full text-sm font-semibold;
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--color-medium);
+}
+
+.dark .badge-medium {
+  background: rgba(245, 158, 11, 0.25);
+}
+
+.badge-low {
+  @apply px-3 py-1 rounded-full text-sm font-semibold;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-low);
+}
+
+.dark .badge-low {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+/* Status badges */
+.status-open {
+  @apply px-3 py-1 rounded-full text-sm font-semibold;
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-open);
+}
+
+.dark .status-open {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+.status-in-progress {
+  @apply px-3 py-1 rounded-full text-sm font-semibold;
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--color-in-progress);
+}
+
+.dark .status-in-progress {
+  background: rgba(245, 158, 11, 0.25);
+}
+
+.status-resolved {
+  @apply px-3 py-1 rounded-full text-sm font-semibold;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-resolved);
+}
+
+.dark .status-resolved {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+.status-closed {
+  @apply px-3 py-1 rounded-full text-sm font-semibold;
+  background: rgba(107, 114, 128, 0.15);
+  color: var(--color-closed);
+}
+
+.dark .status-closed {
+  background: rgba(107, 114, 128, 0.25);
+}
