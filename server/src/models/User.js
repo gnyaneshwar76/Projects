@@ -33,6 +33,26 @@ const userSchema = new mongoose.Schema({
     default: '',
     maxlength: 200,
   },
+  isEmailVerified: {
+    type: Boolean,
+    default: false,
+  },
+  twoFactorSecret: {
+    type: String, // Stored encrypted or as base32/URL
+    default: null,
+  },
+  is2FAEnabled: {
+    type: Boolean,
+    default: false,
+  },
+  bookmarks: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Bug',
+  }],
+  isBanned: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

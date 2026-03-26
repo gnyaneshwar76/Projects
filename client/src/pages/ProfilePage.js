@@ -15,6 +15,8 @@ function ProfilePage({ isDark }) {
   const [loading, setLoading] = useState(true);
   const [editingBio, setEditingBio] = useState(false);
   const [bioInput, setBioInput] = useState('');
+  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  const [twoFAMsg, setTwoFAMsg] = useState('');
 
   const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
   const isOwnProfile = currentUser && (currentUser._id === userId || currentUser.id === userId);
@@ -26,6 +28,8 @@ function ProfilePage({ isDark }) {
         const res = await authAPI.getUserProfile(userId);
         setProfile(res.data);
         setBioInput(res.data.bio || '');
+        if (isOwnProfile) setIs2FAEnabled(res.data.is2FAEnabled);
+
         // Fetch this user's bugs
         const bugsRes = await bugAPI.getAllBugs({});
         const userBugs = (bugsRes.data.bugs || []).filter(
@@ -46,6 +50,18 @@ function ProfilePage({ isDark }) {
       setProfile(prev => ({ ...prev, bio: bioInput }));
       setEditingBio(false);
     } catch {}
+  };
+
+  const handleToggle2FA = async () => {
+    try {
+      const res = await authAPI.toggle2FA();
+      setIs2FAEnabled(res.data.is2FAEnabled);
+      setTwoFAMsg(res.data.message);
+      setTimeout(() => setTwoFAMsg(''), 3000);
+    } catch (err) {
+      setTwoFAMsg('Failed to toggle 2FA');
+      setTimeout(() => setTwoFAMsg(''), 3000);
+    }
   };
 
   if (loading) {
@@ -134,6 +150,29 @@ function ProfilePage({ isDark }) {
               </div>
             )}
           </div>
+
+          {/* Security Settings (2FA) */}
+          {isOwnProfile && (
+            <div className={`mt-6 pt-4 border-t ${isDark ? 'border-[#343536]' : 'border-gray-200'}`}>
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Two-Factor Authentication</h3>
+                  <p className={`text-xs ${muted}`}>Add an extra layer of security to your account.</p>
+                </div>
+                <button
+                  onClick={handleToggle2FA}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold border ${
+                    is2FAEnabled 
+                      ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500/20' 
+                      : 'bg-green-500/10 text-green-500 border-green-500/30 hover:bg-green-500/20'
+                  }`}
+                >
+                  {is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+                </button>
+              </div>
+              {twoFAMsg && <p className="mt-2 text-xs font-semibold text-indigo-500">{twoFAMsg}</p>}
+            </div>
+          )}
         </div>
       </div>
 

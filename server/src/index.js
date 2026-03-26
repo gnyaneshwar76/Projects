@@ -9,6 +9,8 @@ const bugRoutes = require('./routes/bugRoutes');
 const authRoutes = require('./routes/authRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 const app = express();
 
@@ -29,6 +31,8 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/bugradarpub
 app.use('/api/auth', authRoutes);
 app.use('/api/bugs', bugRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/reports', reportRoutes);
 app.use('/api', aiRoutes);
 
 // Health check
