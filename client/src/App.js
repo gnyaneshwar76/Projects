@@ -173,7 +173,7 @@ function Sidebar({ isDark, user, onLogout }) {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
           }}>
-            🐛 BugRadar
+            🐛 TraceStack
           </div>
         </Link>
       </div>
@@ -304,7 +304,7 @@ function TopBar({ isDark, onThemeToggle, user, onLogout }) {
       case '/bugs': return 'Bug Tracker';
       case '/bugs/create': return 'Report Bug';
       case '/analysis/clusters': return 'Cluster Analysis';
-      default: return 'BugRadar';
+      default: return 'TraceStack';
     }
   };
 

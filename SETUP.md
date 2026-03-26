@@ -1,4 +1,4 @@
-# BugRadar - Setup & Installation Guide
+# TraceStack - Setup & Installation Guide
 
 ## Quick Start (5 minutes)
 
@@ -62,10 +62,10 @@ npm start
 
 1. Create account at: https://www.mongodb.com/cloud/atlas
 2. Create a free cluster
-3. Get connection string: `mongodb+srv://user:password@cluster.mongodb.net/bugradar`
+3. Get connection string: `mongodb+srv://user:password@cluster.mongodb.net/tracestack`
 4. Update `.env`:
    ```
-   MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/bugradar
+   MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/tracestack
    ```
 
 ---

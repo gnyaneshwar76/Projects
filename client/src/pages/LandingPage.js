@@ -57,7 +57,7 @@ function LandingPage({ isDark = false }) {
         <div className="text-2xl font-extrabold flex items-center gap-2 cursor-pointer transform hover:scale-105 transition-transform">
           <span className="text-3xl">🐛</span>
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-violet-500">
-            BugRadar
+            TraceStack
           </span>
         </div>
         <div className="flex gap-4">
@@ -95,7 +95,7 @@ function LandingPage({ isDark = false }) {
             </span>
           </h1>
           <p className={`text-xl mb-10 max-w-2xl mx-auto leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-            BugRadar is an intelligent bug tracking system that helps teams
+            TraceStack is an intelligent bug tracking system that helps teams
             discover, organize, and resolve issues efficiently. With AI-powered
             clustering and similarity detection, find related bugs instantly.
           </p>
@@ -130,7 +130,7 @@ function LandingPage({ isDark = false }) {
 
       {/* Footer */}
       <footer className={`py-8 text-center border-t transition-colors duration-300 ${isDark ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
-        <p>© 2026 BugRadar. Built with ❤️ and AI magic.</p>
+        <p>© 2026 TraceStack. Built with ❤️ and AI magic.</p>
       </footer>
 
       {/* Modal Overlay */}

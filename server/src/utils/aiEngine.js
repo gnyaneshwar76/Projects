@@ -1,5 +1,5 @@
 /**
- * BugRadar AI Engine — FREE, no paid APIs
+* TraceStack AI Engine — FREE, no paid APIs
  * ─────────────────────────────────────────
  * 1. Keyword extraction (stopword removal)
  * 2. MongoDB keyword search

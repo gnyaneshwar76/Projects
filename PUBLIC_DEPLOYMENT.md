@@ -1,8 +1,8 @@
-# 🌟 BugRadar Public Deployment Guide
+# 🌟 TraceStack Public Deployment Guide
 
 ## ✨ What's New
 
-Your BugRadar website now has:
+Your TraceStack website now has:
 - **Modern Glassmorphism UI** - Sleek frosted glass design with smooth animations
 - **Dark/Light Theme Toggle** - Switch themes with the moon/sun button in the navbar
 - **Responsive Design** - Works perfectly on phones, tablets, and desktops

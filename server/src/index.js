@@ -20,7 +20,7 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/bugradarpublish', {
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/tracestackpublish', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })

@@ -1,7 +1,7 @@
 {
-  "name": "bugradar-server",
+  "name": "tracestack-server",
   "version": "1.0.0",
-  "description": "BugRadar backend - intelligent bug tracking system",
+  "description": "TraceStack backend - intelligent bug tracking system",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

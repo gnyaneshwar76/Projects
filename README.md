@@ -1,7 +1,7 @@
-# BugRadar 📡
+# TraceStack 📡
 **A Community-Driven Bug Resolution Platform with AI-Assisted Debugging**
 
-BugRadar is a modern, production-grade web application where developers and users come together to discuss, reproduce, and solve software bugs. It combines community features—like Reddit-style voting and threaded discussions—with real-time, privacy-first AI assistance.
+TraceStack is a modern, production-grade web application where developers and users come together to discuss, reproduce, and solve software bugs. It combines community features—like Reddit-style voting and threaded discussions—with real-time, privacy-first AI assistance.
 
 ## 🚀 Features
 
@@ -20,7 +20,7 @@ BugRadar is a modern, production-grade web application where developers and user
 - **Accepted Solutions**: Bug authors can pin the definitively correct answer to the top of the discussion.
 
 ### 🤖 3. AI-Assisted Debugging
-- **Smart Draft Assistant**: While typing a new bug report, BugRadar uses local TF-IDF processing to instantly suggest relevant tags, identify related duplicates, and offer common fixes—*before* the bug is even posted.
+- **Smart Draft Assistant**: While typing a new bug report, TraceStack uses local TF-IDF processing to instantly suggest relevant tags, identify related duplicates, and offer common fixes—*before* the bug is even posted.
 - **Context-Aware Global Chat Widget**: Powered by NVIDIA's `llama-3.3-nemotron`. The AI knows which page you are on, reads the metadata of the bug you're viewing, and provides contextual debugging help.
 
 ### 🛡️ 4. Moderation Tools (Backend)
@@ -31,7 +31,7 @@ BugRadar is a modern, production-grade web application where developers and user
 
 ## 🏗️ Architecture
 
-BugRadar is built as a Single Page Application (SPA) driven by a distinct RESTful API.
+TraceStack is built as a Single Page Application (SPA) driven by a distinct RESTful API.
 
 - **Frontend**: React (Create React App), React Router V6, Tailwind CSS mapping customized CSS variables, Axios.
 - **Backend**: Node.js, Express.js.
@@ -103,14 +103,14 @@ BugRadar is built as a Single Page Application (SPA) driven by a distinct RESTfu
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-repo/bugradar.git
+   git clone https://github.com/your-repo/tracestack.git
    ```
 
 2. **Environment Setup (Server):**
    Navigate to `/server` and create a `.env` file:
    ```env
    PORT=5000
-   MONGO_URI=mongodb://localhost:27017/bugradar_prod
+   MONGO_URI=mongodb://localhost:27017/tracestack_prod
    JWT_SECRET=your_super_secret_jwt_key
    NVIDIA_API_KEY=your_nvidia_api_key
    ```

@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 const sendEmail = async ({ to, subject, html }) => {
   try {
     const mailOptions = {
-      from: `"BugRadar Security" <${process.env.EMAIL_USER || 'noreply@bugradar.com'}>`,
+      from: `"TraceStack Security" <${process.env.EMAIL_USER || 'noreply@tracestack.com'}>`,
       to,
       subject,
       html

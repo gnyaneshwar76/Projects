@@ -621,7 +621,7 @@ function analyzeContext(bugContext) {
       `Open the Network tab and reproduce the issue — look for failed (red) requests`,
       `Add a breakpoint or \`console.log\` at the first line of the related function`,
       `Check that all environment variables (.env) are correctly set and loaded`,
-      `Search BugRadar for similar reports using keywords: ${keywords.slice(0,4).join(', ')}`,
+      `Search TraceStack for similar reports using keywords: ${keywords.slice(0,4).join(', ')}`,
     ],
     followUp: pickFollowUp(keywords),
   };

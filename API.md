@@ -1,4 +1,4 @@
-# BugRadar - API Documentation
+# TraceStack - API Documentation
 
 ## Base URL
 ```
@@ -487,7 +487,7 @@ GET /api/bugs?page=1&limit=20
 ```json
 {
   "info": {
-    "name": "BugRadar API",
+    "name": "TraceStack API",
     "version": "1.0.0"
   },
   "item": [

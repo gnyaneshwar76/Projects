@@ -1,4 +1,4 @@
-# BugRadar - Complete File Manifest
+# TraceStack - Complete File Manifest
 
 ## 📦 Project Files Overview
 
@@ -224,7 +224,7 @@ client/src/
 ## 📁 Complete Directory Tree
 
 ```
-BugRadar/
+TraceStack/
 │
 ├── 📄 README.md
 ├── 📄 QUICKSTART.md

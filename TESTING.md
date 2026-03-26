@@ -1,4 +1,4 @@
-# BugRadar - Testing Guide
+# TraceStack - Testing Guide
 
 ## Quick Testing Steps
 
@@ -276,7 +276,7 @@ curl -i http://localhost:5000/api/bugs
 ### Reset Database
 ```bash
 # Delete all bugs and start fresh
-mongo bugradar
+mongo tracestack
 db.bugs.deleteMany({})
 ```
 

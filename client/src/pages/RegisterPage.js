@@ -73,7 +73,7 @@ function RegisterPage({ isDark = false }) {
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
       }}>
         <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: isDark ? '#f3f4f6' : '#111827', marginBottom: '8px', textAlign: 'center' }}>
-          🐛 BugRadar
+          🐛 TraceStack
         </h1>
         
         {successMsg && !error && (

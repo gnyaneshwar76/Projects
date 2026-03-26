@@ -52,9 +52,9 @@ const register = async (req, res) => {
     // Send Verification Email
     await sendEmail({
       to: user.email,
-      subject: 'Verify your BugRadar Account',
+      subject: 'Verify your TraceStack Account',
       html: `
-        <h3>Welcome to BugRadar, ${user.name}!</h3>
+        <h3>Welcome to TraceStack, ${user.name}!</h3>
         <p>Your 6-digit email verification code is:</p>
         <h2 style="color: #4f46e5; letter-spacing: 2px;">${otpCode}</h2>
         <p>This code expires in 10 minutes. Please enter it to verify your account.</p>
@@ -123,7 +123,7 @@ const login = async (req, res) => {
       
       await sendEmail({
         to: user.email,
-        subject: 'New Login Detected – BugRadar',
+        subject: 'New Login Detected – TraceStack',
         html: `
           <h3>Hi ${user.name},</h3>
           <p>We detected a login attempt on your account.</p>
@@ -144,7 +144,7 @@ const login = async (req, res) => {
     // Standard Login (Send non-OTP alert)
     await sendEmail({
       to: user.email,
-      subject: 'New Login Detected – BugRadar',
+      subject: 'New Login Detected – TraceStack',
       html: `
         <h3>Hi ${user.name},</h3>
         <p>A successful login was just made to your account.</p>
@@ -232,7 +232,7 @@ const forgotPassword = async (req, res) => {
 
     await sendEmail({
       to: user.email,
-      subject: 'BugRadar - Password Reset OTP',
+      subject: 'TraceStack - Password Reset OTP',
       html: `
         <h3>Password Reset Request</h3>
         <p>You requested a password reset. Use this OTP to reset your password:</p>

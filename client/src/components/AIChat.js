@@ -182,7 +182,7 @@ function AIChat({ isDark, bugContext = null, autoOpen = false, onAutoOpenHandled
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm font-bold">⚡</div>
               <div>
-                <div className="text-white font-bold text-sm">BugRadar AI</div>
+                <div className="text-white font-bold text-sm">TraceStack AI</div>
                 <div className="text-white/70 text-[10px]">Debugging Assistant</div>
               </div>
             </div>

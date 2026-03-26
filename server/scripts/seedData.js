@@ -1,5 +1,5 @@
 /**
- * Sample data script for BugRadar
+ * Sample data script for TraceStack
  * Run this to populate the database with test bugs
  * 
  * Usage: node scripts/seedData.js
@@ -13,13 +13,13 @@ const Bug = require('../src/models/Bug');
 const sampleUsers = [
   {
     name: 'Admin User',
-    email: 'admin@bugradar.com',
+    email: 'admin@tracestack.com',
     password: 'admin123',
     role: 'admin'
   },
   {
     name: 'Test User',
-    email: 'user@bugradar.com',
+    email: 'user@tracestack.com',
     password: 'user123',
     role: 'user'
   }
@@ -170,7 +170,7 @@ async function seedUsers() {
 async function seedDatabase() {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/bugradar', {
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/tracestack', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });

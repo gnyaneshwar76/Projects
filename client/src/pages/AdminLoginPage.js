@@ -105,7 +105,7 @@ function AdminLoginPage({ isDark = false }) {
                 outline: 'none',
                 transition: 'border-color 0.2s'
               }}
-              placeholder="admin@bugradar.com"
+              placeholder="admin@tracestack.com"
             />
           </div>
 
