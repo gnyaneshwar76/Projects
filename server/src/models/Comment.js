@@ -36,6 +36,10 @@ const commentSchema = new mongoose.Schema({
   upvotedBy: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  }],
+  downvotedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   }]
 }, { timestamps: true });
 

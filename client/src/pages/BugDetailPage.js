@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { bugAPI } from '../utils/api';
+import { bugAPI, authAPI, reportAPI } from '../utils/api';
 import '../App.css';
 
 function CommentThread({ comment, allComments, onReply, onVoteComment, isDark, updating, bugAuthorId, isSolved, acceptedAnswerId, onMarkSolved }) {
@@ -166,6 +166,12 @@ function BugDetailPage({ isDark = false }) {
   const [editData, setEditData] = useState({});
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  
+  // Community features
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportTarget, setReportTarget] = useState(null); // { type: 'bug'|'comment', id: '' }
 
   // Derive current user from localStorage
   const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
@@ -175,7 +181,17 @@ function BugDetailPage({ isDark = false }) {
     fetchBugDetails();
     fetchSimilarBugs();
     fetchComments();
+    checkIfBookmarked();
   }, [bugId]);
+
+  const checkIfBookmarked = async () => {
+    if (!currentUser) return;
+    try {
+      const res = await authAPI.getCurrentUser();
+      const userBookmarks = res.data.bookmarks || [];
+      setIsBookmarked(userBookmarks.includes(bugId));
+    } catch (err) {}
+  };
 
   // Broadcast bug context to the global AIChat widget
   useEffect(() => {
@@ -258,6 +274,34 @@ function BugDetailPage({ isDark = false }) {
       setBug({ ...bug, score: res.data.score });
     } catch (err) {
       setMessage({ type: 'error', text: err.response?.data?.error || err.message });
+    }
+  };
+
+  const handleToggleBookmark = async () => {
+    try {
+      const res = await bugAPI.toggleBookmark(bugId);
+      setIsBookmarked(res.data.isBookmarked);
+      setMessage({ type: 'success', text: res.data.message });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Failed to bookmark' });
+    }
+  };
+
+  const handleSubmitReport = async (e) => {
+    e.preventDefault();
+    if (!reportReason.trim() || !reportTarget) return;
+    try {
+      setUpdating(true);
+      await reportAPI.submitReport({ targetType: reportTarget.type, targetId: reportTarget.id, reason: reportReason });
+      setShowReportModal(false);
+      setReportReason('');
+      setMessage({ type: 'success', text: 'Report submitted successfully. Thank you for keeping the community safe!' });
+      setTimeout(() => setMessage(null), 4000);
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to submit report' });
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -417,32 +461,47 @@ function BugDetailPage({ isDark = false }) {
                     )}
                   </div>
                 </div>
-                {/* Ask AI button — visible to all users */}
-                <button
-                  onClick={() => window.dispatchEvent(new CustomEvent('aiChatOpen'))}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-all hover:scale-105"
-                  style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: 'white' }}
-                >
-                  🤖 Ask AI
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleToggleBookmark}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-all border"
+                    style={{
+                      background: isBookmarked ? (isDark ? '#eab30820' : '#fef9c3') : (isDark ? '#374151' : '#f3f4f6'),
+                      color: isBookmarked ? (isDark ? '#fde047' : '#ca8a04') : (isDark ? '#d1d5db' : '#4b5563'),
+                      borderColor: isBookmarked ? (isDark ? '#ca8a0450' : '#fde047') : (isDark ? '#4b5563' : '#d1d5db')
+                    }}
+                  >
+                    {isBookmarked ? '🔖 Saved' : '🔖 Save'}
+                  </button>
 
-                {/* Edit & Delete: only visible to the post owner */}
-                {isOwner && (
-                  <div className="flex gap-2">
                   <button
-                    onClick={() => setEditMode(!editMode)}
-                    className="btn-secondary btn-base"
+                    onClick={() => { setReportTarget({ type: 'bug', id: bugId }); setShowReportModal(true); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-all hover:bg-red-50 focus:outline-none border border-transparent text-gray-500 hover:text-red-600 hover:border-red-200"
                   >
-                    {editMode ? '✕ Cancel' : '✏️ Edit'}
+                    🚩 Report
                   </button>
+
+                  {/* Ask AI button — visible to all users */}
                   <button
-                    onClick={handleDelete}
-                    className="btn-danger btn-base"
+                    onClick={() => window.dispatchEvent(new CustomEvent('aiChatOpen'))}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-all hover:scale-105"
+                    style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: 'white' }}
                   >
-                    🗑️ Delete
+                    🤖 Ask AI
                   </button>
+
+                  {/* Edit & Delete: only visible to the post owner */}
+                  {isOwner && (
+                    <div className="flex gap-2 ml-2 border-l pl-2 border-gray-200 dark:border-gray-700">
+                      <button onClick={() => setEditMode(!editMode)} className="btn-secondary btn-base text-sm">
+                        {editMode ? '✕ Cancel' : '✏️ Edit'}
+                      </button>
+                      <button onClick={handleDelete} className="btn-danger btn-base text-sm">
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
-                )}
               </div>
             </div>
 
@@ -775,6 +834,36 @@ function BugDetailPage({ isDark = false }) {
           )}
         </div>
       </div>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 50,
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{
+            backgroundColor: isDark ? '#1f2937' : 'white', padding: '24px', borderRadius: '12px',
+            width: '100%', maxWidth: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+          }}>
+            <h3 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Report Issue</h3>
+            <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Please describe why you are reporting this content. Our moderation team will review it shortly.</p>
+            <form onSubmit={handleSubmitReport}>
+              <textarea
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                placeholder="Reason for report..."
+                className={`w-full p-3 rounded-lg border mb-4 outline-none ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
+                rows={4}
+                required
+              />
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => setShowReportModal(false)} className={`px-4 py-2 rounded-lg font-bold ${isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>Cancel</button>
+                <button type="submit" disabled={updating || !reportReason.trim()} className="px-4 py-2 rounded-lg font-bold bg-red-600 text-white disabled:opacity-50 hover:bg-red-700">Submit Report</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

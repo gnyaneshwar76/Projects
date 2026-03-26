@@ -60,52 +60,64 @@ async function getAllBugs(req, res) {
     if (status) filter.status = status;
     if (severity) filter.severity = severity;
 
-    // Live search: match title, description, or tags
+    // Live search
     if (q && q.trim()) {
       const regex = new RegExp(q.trim(), 'i');
-      filter.$and = [
-        {
-          $or: [
-            { title: regex },
-            { description: regex },
-            { tags: regex }
-          ]
-        }
-      ];
+      filter.$and = [{ $or: [{ title: regex }, { description: regex }, { tags: regex }] }];
     }
 
-    // Tag filter: match bugs that contain this tag
+    // Tag filter
     if (tag && tag.trim()) {
       const tagRegex = new RegExp(`^${tag.trim()}$`, 'i');
-      if (filter.$and) {
-        filter.$and.push({ tags: tagRegex });
-      } else {
-        filter.tags = tagRegex;
-      }
+      if (filter.$and) filter.$and.push({ tags: tagRegex });
+      else filter.tags = tagRegex;
     }
 
-    // Solved / unsolved filter
+    // Solved check
     if (solved === 'true') filter.isSolved = true;
     if (solved === 'false') filter.isSolved = { $ne: true };
 
-    // Authorization: only show own bugs + public bugs
+    // Auth check
     const authClause = { $or: [{ userId: req.user.id }, { visibility: 'public' }] };
-    if (filter.$and) {
-      filter.$and.push(authClause);
-    } else {
-      Object.assign(filter, authClause);
-    }
+    if (filter.$and) filter.$and.push(authClause);
+    else Object.assign(filter, authClause);
 
+    // If simple sort
     let sortObj = { createdAt: -1 };
-    if (sortBy === 'most-upvoted' || sortBy === 'top') sortObj = { score: -1, createdAt: -1 };
+    
+    // Convert to Aggregation for Trending Score
+    // trending_score = votes + (comments * 2) + recency factor (e.g. 1 / hours_since_creation)
+    const pipeline = [
+      { $match: filter },
+      // Lookup comments to get count for trending math
+      { $lookup: { from: 'comments', localField: '_id', foreignField: 'bug', as: 'allComments' } },
+      { $addFields: { 
+          commentCount: { $size: '$allComments' },
+          hoursAlive: { $divide: [{ $subtract: [new Date(), '$createdAt'] }, 3600000] }
+      }},
+      { $addFields: {
+          trendingScore: {
+            $add: [
+              '$score', 
+              { $multiply: ['$commentCount', 2] },
+              { $divide: [100, { $add: ['$hoursAlive', 1] }] } // Recency boost factor
+            ]
+          }
+      }},
+      { $project: { allComments: 0, hoursAlive: 0 } } // Clean up payload
+    ];
+
+    if (sortBy === 'trending') sortObj = { trendingScore: -1 };
+    else if (sortBy === 'most-solved') sortObj = { isSolved: -1, score: -1 };
     else if (sortBy === 'latest' || sortBy === 'new') sortObj = { createdAt: -1 };
-    else if (sortBy === 'most-solved' || sortBy === 'solved') sortObj = { isSolved: -1, updatedAt: -1, score: -1 };
-    else if (sortBy === 'hot') sortObj = { score: -1, updatedAt: -1 };
     else sortObj = { [sortBy]: order === 'asc' ? 1 : -1 };
 
-    const bugs = await Bug.find(filter)
-      .sort(sortObj)
-      .populate('relatedBugs', 'title severity status');
+    pipeline.push({ $sort: sortObj });
+
+    const bugs = await Bug.aggregate(pipeline);
+
+    // Note: Bug.aggregate doesn't auto-populate objectIds easily without further lookups, 
+    // but the frontend primarily needs the base bug details here.
 
     res.json({ total: bugs.length, bugs });
   } catch (error) {
@@ -774,6 +786,33 @@ async function suggestBugImprovements(req, res) {
   }
 }
 
+/**
+ * Toggle Bookmark on a Bug
+ */
+async function toggleBookmark(req, res) {
+  try {
+    const { bugId } = req.params;
+    const user = await User.findById(req.user.id);
+    
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    const index = user.bookmarks.indexOf(bugId);
+    let isBookmarked = false;
+    
+    if (index > -1) {
+      user.bookmarks.splice(index, 1);
+    } else {
+      user.bookmarks.push(bugId);
+      isBookmarked = true;
+    }
+    
+    await user.save();
+    res.json({ message: isBookmarked ? 'Added to bookmarks' : 'Removed from bookmarks', isBookmarked });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   createBug,
   getAllBugs,
@@ -790,6 +829,7 @@ module.exports = {
   voteOnBug,
   markAsSolved,
   voteOnComment,
+  toggleBookmark,
   chatWithAI,
   suggestBugImprovements,
 };

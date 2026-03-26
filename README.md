@@ -1,113 +1,133 @@
-# BugRadar
+# BugRadar 📡
+**A Community-Driven Bug Resolution Platform with AI-Assisted Debugging**
 
-A community-driven bug resolution platform with AI-assisted debugging.
+BugRadar is a modern, production-grade web application where developers and users come together to discuss, reproduce, and solve software bugs. It combines community features—like Reddit-style voting and threaded discussions—with real-time, privacy-first AI assistance.
 
-## Problem Statement
+## 🚀 Features
 
-Traditional bug trackers are good for logging issues, but weak for collaborative debugging. Teams need a public feed where developers can discuss, vote, and converge on proven solutions quickly.
+### 🔐 1. Advanced Authentication & Security
+- **JWT-Based Sessions**: Secure authentication using `HTTPOnly` cookies (ready for deployment).
+- **Email Verification**: Prevents spam accounts by enforcing OTP email verification during signup.
+- **Two-Factor Authentication (2FA)**: Opt-in layer of extra security via email OTP.
+- **Forgot/Reset Password**: Secure, expiring token-based password recovery flow.
+- **Role-Based Access Control (RBAC)**: Distinct permissions for `user` vs `admin` workflows.
 
-## Solution
+### 🌐 2. Community-Driven Feeds
+- **Trending Algorithm**: Dynamic bug ranking based on a combination of upvotes, comment volume, and recency (time-decay score).
+- **Tabs Interface**: Instantly switch between **Trending**, **New**, and **Unresolved** bug feeds.
+- **Bookmarking**: Save important bugs directly to your profile.
+- **Reputation & Voting**: Upvote/downvote bugs and comments to surface the best solutions.
+- **Accepted Solutions**: Bug authors can pin the definitively correct answer to the top of the discussion.
 
-BugRadar combines Reddit-style issue discussions with structured bug reporting and AI assistance. Users can post bugs, vote, discuss fixes, and mark the best solution while AI helps with tags, likely fixes, and duplicate detection.
+### 🤖 3. AI-Assisted Debugging
+- **Smart Draft Assistant**: While typing a new bug report, BugRadar uses local TF-IDF processing to instantly suggest relevant tags, identify related duplicates, and offer common fixes—*before* the bug is even posted.
+- **Context-Aware Global Chat Widget**: Powered by NVIDIA's `llama-3.3-nemotron`. The AI knows which page you are on, reads the metadata of the bug you're viewing, and provides contextual debugging help.
 
-## Features
+### 🛡️ 4. Moderation Tools (Backend)
+- **Community Flagging**: Users can flag inappropriate bugs or comments directly answering to the Moderation queue.
+- **Admin APIs**: Secure endpoints allowing appointed admins to process reports, delete offending content, or ban malicious users.
 
-- Public bug feed with card-based UI
-- Structured bug submission (title, description, tags, steps, severity, visibility)
-- AI-assisted posting workflow:
-  - auto tag suggestions
-  - likely fix suggestions
-  - possible duplicate bug detection
-- Comments and threaded replies per bug
-- Mark comment as best solution
-- Voting:
-  - upvote/downvote bugs
-  - upvote useful solutions/comments
-- Sorting options:
-  - latest
-  - most upvoted
-  - most solved
-- Profile, authentication, and notifications
+---
 
-## Tech Stack
+## 🏗️ Architecture
 
-- Frontend: React, React Router, Axios, Tailwind CSS
-- Backend: Node.js, Express
-- Database: MongoDB, Mongoose
-- AI/ML:
-  - NVIDIA-hosted LLM endpoint for AI chat
-  - keyword/rule-based debug assistance
-  - TF-IDF similarity utilities for duplicate detection
+BugRadar is built as a Single Page Application (SPA) driven by a distinct RESTful API.
 
-## Project Structure
+- **Frontend**: React (Create React App), React Router V6, Tailwind CSS mapping customized CSS variables, Axios.
+- **Backend**: Node.js, Express.js.
+- **Database**: MongoDB (Mongoose), utilizing complex Aggregation Pipelines for sorting.
+- **AI Integration**: Custom lightweight keyword-extraction module combined with the remote NVIDIA LLM API.
 
-```bash
-BugRadar/
-├── client/                # Frontend (UI, pages, components, API client)
-├── server/                # Backend (routes, controllers, models, middleware)
-├── docs/                  # Screenshots and demo visuals
-├── README.md
-└── .gitignore
-```
+---
 
-## Setup
+## 🗄️ Database Schemas
 
-### 1) Backend
+### `User`
+- `username`, `email`, `password` (bcrypt hashed)
+- `role`: `'user'` | `'admin'`
+- `isEmailVerified`: boolean
+- `twoFactorSecret`: string (secret key/status)
+- `bookmarks`: Array<ObjectId (Bug)>
+- `isBanned`: boolean
 
-```bash
-cd server
-npm install
-cp .env.example .env
-npm run dev
-```
+### `Bug`
+- `title`, `description`, `stepsToReproduce`, `severity`, `tags`
+- `status`: `'open'` | `'in-progress'` | `'resolved'` | `'closed'`
+- `score`: integer (net upvotes)
+- `isSolved`: boolean
+- `acceptedAnswerId`: ObjectId (Comment)
+- `savedBy`: Array<ObjectId (User)>
 
-Required `server/.env` keys:
+### `Comment`
+- `text`, `bugId`
+- `parentId`: ObjectId (for threaded replies)
+- `score`: integer
 
-```env
-MONGO_URI=
-PORT=5000
-NODE_ENV=development
-JWT_SECRET=
-NVIDIA_API_KEY=
-```
+### `Token`
+- Handles OTPs and URL hashes.
+- `userId`, `token`, `type` (`'email_verification'`, `'password_reset'`, `'2fa'`)
+- `expiresAt`: Date
 
-### 2) Frontend
+### `Report` (Moderation)
+- `reporterId`, `targetType` (`'bug'` | `'comment'`), `targetId`, `reason`
+- `status`: `'pending'` | `'resolved'` | `'dismissed'`
 
-```bash
-cd client
-npm install
-npm start
-```
+---
 
-Optional `client/.env`:
+## 🔌 API Documentation
 
-```env
-REACT_APP_API_URL=http://localhost:5000/api
-```
+### **Auth (`/api/auth`)**
+- `POST /register`: Request OTP.
+- `POST /verify-email`: Finalize registration with OTP.
+- `POST /login`: Authenticate (handles 2FA challenges).
+- `POST /2fa/verify`: Submit 2FA token to finish login.
+- `POST /2fa/toggle`: Switch 2FA status for the active user.
+- `POST /forgot-password` & `POST /reset-password`: Account recovery.
 
-## Screenshots
+### **Bugs (`/api/bugs`)**
+- `GET /`: Fetch feed (Supports `?sortBy=hot|new`).
+- `POST /`: Create a new Bug.
+- `POST /suggest`: Analyzes draft titles/descriptions in real-time.
+- `POST /chat`: Communicates with the Context-Aware AI.
+- `PUT /:id/vote`: Up/down vote a bug.
+- `POST /:id/bookmark`: Toggle saved bug state.
 
-Add screenshots in `docs/` and reference them here:
+### **Admin (`/api/admin`)** - *(Requires Admin Role)*
+- `GET /reports`: View all user-generated flags.
+- `DELETE /bugs/:id`: Forcibly remove a post.
+- `POST /users/:id/ban`: Prevent user access.
 
-- `docs/feed.png` - Public bug feed
-- `docs/create-bug-ai-assist.png` - AI-assisted bug posting
-- `docs/bug-detail-comments.png` - Solutions and best-answer flow
+---
 
-## API Highlights
+## ⚙️ Installation & Setup
 
-- `GET /api/bugs` - bug feed with filtering/sorting
-- `POST /api/bugs` - create bug with AI assistance in response
-- `POST /api/bugs/suggest` - AI-guided bug draft suggestions
-- `POST /api/bugs/:bugId/vote` - upvote/downvote bug
-- `GET /api/bugs/:bugId/comments` - fetch comments
-- `POST /api/bugs/:bugId/comments` - add comment/reply
-- `POST /api/bugs/:bugId/comments/:commentId/vote` - upvote useful solution
-- `PUT /api/bugs/:bugId/solve` - mark best solution
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-repo/bugradar.git
+   ```
 
-## Future Improvements
+2. **Environment Setup (Server):**
+   Navigate to `/server` and create a `.env` file:
+   ```env
+   PORT=5000
+   MONGO_URI=mongodb://localhost:27017/bugradar_prod
+   JWT_SECRET=your_super_secret_jwt_key
+   NVIDIA_API_KEY=your_nvidia_api_key
+   ```
+   Install dependencies and start backend:
+   ```bash
+   cd server
+   npm install
+   npm run dev
+   ```
 
-- Reputation leaderboard and badges
-- Pagination/infinite scrolling for large feeds
-- Real-time updates with websockets
-- Rich markdown editor and attachments
-- Better semantic duplicate detection with vector search
+3. **Environment Setup (Client):**
+   Navigate to `/client`. Ensure your API url points to `http://localhost:5000`.
+   ```bash
+   cd client
+   npm install
+   npm start
+   ```
+
+## 📜 License
+MIT License. Openly accessible for community enhancements.

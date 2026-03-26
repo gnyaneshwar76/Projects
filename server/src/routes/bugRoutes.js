@@ -31,6 +31,9 @@ router.post('/:bugId/comments/:commentId/vote', authMiddleware, bugController.vo
 router.post('/:bugId/vote', authMiddleware, bugController.voteOnBug);
 router.put('/:bugId/solve', authMiddleware, bugController.markAsSolved);
 
+// Bookmark
+router.post('/:bugId/bookmark', authMiddleware, bugController.toggleBookmark);
+
 // AI Chat Feature
 router.post('/chat/ai', bugController.chatWithAI);
 
