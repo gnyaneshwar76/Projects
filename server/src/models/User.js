@@ -24,6 +24,47 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user',
   },
+  // Security & Verification
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  emailVerificationToken: String,
+  emailVerificationExpiry: Date,
+  
+  // 2FA / OTP (Hashed)
+  otp: String,
+  otpExpiry: Date,
+  otpAttempts: {
+    type: Number,
+    default: 0,
+  },
+  otpBlockedUntil: Date,
+  
+  // Password Reset (Hashed)
+  resetPasswordToken: String,
+  resetPasswordExpiry: Date,
+  
+  // Session Security
+  tokenVersion: {
+    type: Number,
+    default: 0,
+  },
+  lastLoginIP: String,
+  lastLoginDevice: String,
+
+  // WebAuthn Passkeys
+  passkeys: [{
+    credentialID: Buffer,
+    publicKey: Buffer,
+    counter: Number,
+    transports: [String],
+    deviceType: String,
+    backedUp: Boolean,
+    createdAt: { type: Date, default: Date.now }
+  }],
+
+  // Social/Features
   reputation: {
     type: Number,
     default: 0,
@@ -32,14 +73,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
     maxlength: 200,
-  },
-  isEmailVerified: {
-    type: Boolean,
-    default: false,
-  },
-  twoFactorSecret: {
-    type: String, // Stored encrypted or as base32/URL
-    default: null,
   },
   is2FAEnabled: {
     type: Boolean,

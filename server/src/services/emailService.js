@@ -1,11 +1,22 @@
 const nodemailer = require('nodemailer');
 
-// Configure Nodemailer with Gmail SMTP
+// Configure Nodemailer with Direct Gmail SMTP for reliability
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // true for 465, false for other ports
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    user: (process.env.EMAIL_USER || "").trim(),
+    pass: (process.env.EMAIL_PASS || "").trim()
+  }
+});
+
+// Verify connection on startup
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ SMTP Connection Error:", error.message);
+  } else {
+    console.log("✅ SMTP Ready: TraceStack is prepared to send emails.");
   }
 });
 
