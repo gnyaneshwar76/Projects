@@ -5,3 +5,11 @@ node_modules/
 Thumbs.db
 .vscode/
 .idea/
+dist/
+build/
+coverage/
+*.local
+client/.env
+server/.env
+client/node_modules/
+server/node_modules/

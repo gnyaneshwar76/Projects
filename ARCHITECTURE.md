@@ -1,4 +1,4 @@
-# BugRadar - Architecture & System Design
+# TraceStack - Architecture & System Design
 
 ## System Overview
 

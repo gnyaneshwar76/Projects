@@ -3,12 +3,12 @@ const User = require('./src/models/User');
 
 (async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/bugradarpublish', {
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/tracestackpublish', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
-    const u = await User.findOne({ email: 'admin@bugradar.com' }).lean();
+    const u = await User.findOne({ email: 'admin@tracestack.com' }).lean();
     console.log('user:', u);
     process.exit(0);
   } catch (err) {

@@ -27,8 +27,12 @@ router.delete('/:bugId', authMiddleware, bugController.deleteBug);
  */
 router.post('/:bugId/comments', authMiddleware, bugController.addComment);
 router.get('/:bugId/comments', authMiddleware, bugController.getComments);
+router.post('/:bugId/comments/:commentId/vote', authMiddleware, bugController.voteOnComment);
 router.post('/:bugId/vote', authMiddleware, bugController.voteOnBug);
 router.put('/:bugId/solve', authMiddleware, bugController.markAsSolved);
+
+// Bookmark
+router.post('/:bugId/bookmark', authMiddleware, bugController.toggleBookmark);
 
 // AI Chat Feature
 router.post('/chat/ai', bugController.chatWithAI);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { bugAPI } from '../utils/api';
 import '../App.css';
@@ -129,8 +129,13 @@ const SEVERITY_INFO = {
 function CreateBugPage({ isDark = false }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [analyzingDraft, setAnalyzingDraft] = useState(false);
   const [message, setMessage] = useState(null);
   const [similarBugs, setSimilarBugs] = useState([]);
+  const [draftSuggestions, setDraftSuggestions] = useState([]);
+  const [aiSuggestedTags, setAiSuggestedTags] = useState([]);
+  const [aiSuggestedFixes, setAiSuggestedFixes] = useState([]);
+  const [possibleDuplicates, setPossibleDuplicates] = useState([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -190,6 +195,7 @@ function CreateBugPage({ isDark = false }) {
 
       const response = await bugAPI.createBug(bugData);
       setSimilarBugs(response.data.similarBugs || []);
+      setAiSuggestedFixes(response.data?.aiAssistance?.possibleFixes || []);
       setMessage({ type: 'success', text: '✅ Bug reported successfully! Redirecting...' });
 
       setFormData({
@@ -206,6 +212,43 @@ function CreateBugPage({ isDark = false }) {
   };
 
   const sev = SEVERITY_INFO[formData.severity];
+
+  useEffect(() => {
+    const title = formData.title.trim();
+    const description = formData.description.trim();
+    if (!title && !description) {
+      setDraftSuggestions([]);
+      setAiSuggestedTags([]);
+      setAiSuggestedFixes([]);
+      setPossibleDuplicates([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setAnalyzingDraft(true);
+        const parsedTags = formData.tags.split(',').map((item) => item.trim()).filter(Boolean);
+        const response = await bugAPI.suggestBugImprovements(title, description, parsedTags);
+        setDraftSuggestions(response.data?.suggestions || []);
+        setAiSuggestedTags(response.data?.suggestedTags || []);
+        setAiSuggestedFixes(response.data?.possibleFixes || []);
+        setPossibleDuplicates(response.data?.possibleDuplicates || []);
+      } catch (error) {
+        // Keep UX resilient when AI analysis endpoint fails.
+      } finally {
+        setAnalyzingDraft(false);
+      }
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [formData.title, formData.description, formData.tags]);
+
+  const addSuggestedTag = (tag) => {
+    const parsedTags = formData.tags.split(',').map((item) => item.trim()).filter(Boolean);
+    if (parsedTags.includes(tag)) return;
+    const nextTags = [...parsedTags, tag];
+    setFormData((prev) => ({ ...prev, tags: nextTags.join(', ') }));
+  };
 
   return (
     <div className="container max-w-5xl mx-auto">
@@ -424,23 +467,58 @@ function CreateBugPage({ isDark = false }) {
         <div className="space-y-4">
           <div className="card p-5" style={{ backgroundColor: isDark ? '#1f2937' : undefined, border: isDark ? '1px solid #374151' : undefined }}>
             <h2 className="font-bold text-base mb-3" style={{ color: isDark ? '#f3f4f6' : '#111827' }}>
-              ✅ Tips for a Great Report
+              🤖 AI Draft Assistant {analyzingDraft ? '• analyzing...' : ''}
             </h2>
-            <ul className="space-y-2.5 text-sm" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-              {[
-                ['📌', 'Use a specific, action-based title'],
-                ['🔢', 'List exact steps to reproduce'],
-                ['💬', 'Mention any error messages shown'],
-                ['🖥️', 'Note your browser and OS'],
-                ['🏷️', 'Add relevant tags for easier search'],
-                ['🌍', 'Make it public to get community help'],
-              ].map(([icon, tip], i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span className="mt-0.5">{icon}</span>
-                  <span>{tip}</span>
-                </li>
-              ))}
-            </ul>
+            {draftSuggestions.length === 0 && aiSuggestedTags.length === 0 && aiSuggestedFixes.length === 0 && possibleDuplicates.length === 0 ? (
+              <p className="text-sm" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
+                Start typing title/description to get live quality checks, tag suggestions, likely fixes, and duplicate detection.
+              </p>
+            ) : (
+              <div className="space-y-4 text-sm">
+                {draftSuggestions.length > 0 && (
+                  <div>
+                    <p className="font-semibold mb-2" style={{ color: isDark ? '#f3f4f6' : '#111827' }}>Improve your report</p>
+                    <ul className="space-y-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
+                      {draftSuggestions.map((item, idx) => <li key={`${item.type}-${idx}`}>- {item.text}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {aiSuggestedTags.length > 0 && (
+                  <div>
+                    <p className="font-semibold mb-2" style={{ color: isDark ? '#f3f4f6' : '#111827' }}>Suggested tags</p>
+                    <div className="flex flex-wrap gap-2">
+                      {aiSuggestedTags.map((tag) => (
+                        <button key={tag} type="button" onClick={() => addSuggestedTag(tag)} className="px-2 py-1 rounded-full text-xs font-semibold"
+                          style={{ background: isDark ? '#1e3a5f' : '#dbeafe', color: isDark ? '#93c5fd' : '#1d4ed8' }}>
+                          + #{tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {aiSuggestedFixes.length > 0 && (
+                  <div>
+                    <p className="font-semibold mb-2" style={{ color: isDark ? '#f3f4f6' : '#111827' }}>Possible fixes</p>
+                    <ul className="space-y-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
+                      {aiSuggestedFixes.map((fix, idx) => <li key={`fix-${idx}`}>- {fix}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {possibleDuplicates.length > 0 && (
+                  <div>
+                    <p className="font-semibold mb-2" style={{ color: isDark ? '#f3f4f6' : '#111827' }}>Possible duplicates</p>
+                    <div className="space-y-2">
+                      {possibleDuplicates.map((dup) => (
+                        <div key={dup.id} className="rounded-lg px-3 py-2" style={{ borderLeft: '4px solid #f59e0b', background: isDark ? '#111827' : '#fffbeb' }}>
+                          <p style={{ color: isDark ? '#f3f4f6' : '#111827', fontWeight: 600 }}>{dup.title}</p>
+                          <p style={{ color: isDark ? '#9ca3af' : '#6b7280', fontSize: '12px' }}>{dup.similarity}% similar</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Severity guide card */}

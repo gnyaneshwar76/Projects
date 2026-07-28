@@ -1,8 +1,8 @@
-# BugRadar - Developer Guide
+# TraceStack - Developer Guide
 
 ## For Contributors & Maintainers
 
-This guide covers development workflow, code standards, and extension points for BugRadar.
+This guide covers development workflow, code standards, and extension points for TraceStack.
 
 ---
 
@@ -492,7 +492,7 @@ npm run migrate
 npm start
 
 # 5. Verify health checks
-curl https://api.bugradar.com/health
+curl https://api.tracestack.com/health
 ```
 
 ---

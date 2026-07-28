@@ -1,4 +1,4 @@
-# BugRadar - Project Summary & Quick Start
+# TraceStack - Project Summary & Quick Start
 
 ## 🎉 Project Completion Status
 
@@ -38,7 +38,7 @@
 ## 📦 File Structure
 
 ```
-BugRadar/
+TraceStack/
 ├── README.md                 # Project overview
 ├── SETUP.md                  # Installation guide
 ├── API.md                    # API documentation
@@ -364,7 +364,7 @@ curl http://localhost:5000/api/health
 ### 2. Test Frontend
 ```
 Open http://localhost:3000 in browser
-- Should see BugRadar dashboard
+- Should see TraceStack dashboard
 - No errors in console
 ```
 

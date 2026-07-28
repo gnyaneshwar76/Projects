@@ -7,6 +7,8 @@ import CreateBugPage from './pages/CreateBugPage';
 // import ClusterAnalysisPage from './pages/ClusterAnalysisPage'; // [DISABLED] Cluster Analysis removed — not aligned with community platform
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import LandingPage from './pages/LandingPage';
 import ProfilePage from './pages/ProfilePage';
@@ -85,6 +87,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage isDark={isDark} />} />
           <Route path="/register" element={<RegisterPage isDark={isDark} />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage isDark={isDark} />} />
+          <Route path="/reset-password" element={<ResetPasswordPage isDark={isDark} />} />
           <Route path="/admin/login" element={<AdminLoginPage isDark={isDark} />} />
           <Route path="/" element={<LandingPage isDark={isDark} />} />
           <Route path="*" element={<Navigate to="/" />} />
@@ -169,7 +173,7 @@ function Sidebar({ isDark, user, onLogout }) {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
           }}>
-            🐛 BugRadar
+            🐛 TraceStack
           </div>
         </Link>
       </div>
@@ -300,7 +304,7 @@ function TopBar({ isDark, onThemeToggle, user, onLogout }) {
       case '/bugs': return 'Bug Tracker';
       case '/bugs/create': return 'Report Bug';
       case '/analysis/clusters': return 'Cluster Analysis';
-      default: return 'BugRadar';
+      default: return 'TraceStack';
     }
   };
 

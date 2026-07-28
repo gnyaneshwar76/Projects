@@ -23,7 +23,12 @@ api.interceptors.request.use((config) => {
  */
 export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
+  verifyEmail: (data) => api.post('/auth/verify-email', data),
   login: (credentials) => api.post('/auth/login', credentials),
+  verify2FA: (data) => api.post('/auth/verify-2fa', data),
+  forgotPassword: (data) => api.post('/auth/forgot-password', data),
+  resetPassword: (data) => api.post('/auth/reset-password', data),
+  toggle2FA: () => api.post('/auth/2fa/toggle'),
   getCurrentUser: () => api.get('/auth/me'),
   getUserProfile: (userId) => api.get(`/auth/profile/${userId}`),
   updateProfile: (data) => api.put('/auth/profile', data),
@@ -77,6 +82,7 @@ export const bugAPI = {
   // Comments & Engagement
   addComment: (bugId, text, parentId = null) => api.post(`/bugs/${bugId}/comments`, { text, parentId }),
   getComments: (bugId) => api.get(`/bugs/${bugId}/comments`),
+  voteOnComment: (bugId, commentId) => api.post(`/bugs/${bugId}/comments/${commentId}/vote`),
   voteOnBug: (bugId, type) => api.post(`/bugs/${bugId}/vote`, { type }),
   markAsSolved: (bugId, commentId) => api.put(`/bugs/${bugId}/solve`, { commentId }),
 
@@ -88,6 +94,27 @@ export const bugAPI = {
 
   // Suggest improvements for a draft bug report
   suggestBugImprovements: (title, description, tags) => api.post('/bugs/suggest', { title, description, tags }),
+
+  // Bookmarks
+  toggleBookmark: (bugId) => api.post(`/bugs/${bugId}/bookmark`),
+};
+
+/**
+ * Admin API endpoints
+ */
+export const adminAPI = {
+  getReports: (status = 'pending') => api.get('/admin/reports', { params: { status } }),
+  updateReportStatus: (id, status) => api.put(`/admin/reports/${id}`, { status }),
+  deleteBug: (id) => api.delete(`/admin/bugs/${id}`),
+  deleteComment: (id) => api.delete(`/admin/comments/${id}`),
+  toggleBanUser: (id) => api.post(`/admin/users/${id}/ban`),
+};
+
+/**
+ * Report API endpoints
+ */
+export const reportAPI = {
+  submitReport: (data) => api.post('/reports', data),
 };
 
 export default api;

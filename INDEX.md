@@ -1,4 +1,4 @@
-# BugRadar - Complete Documentation Index
+# TraceStack - Complete Documentation Index
 
 ## 📚 Documentation Map
 
@@ -63,7 +63,7 @@ Choose based on your role/need:
 ---
 
 ### README.md (Project Overview)
-**For:** Understanding what BugRadar is and does
+**For:** Understanding what TraceStack is and does
 **Contains:**
 - Project purpose
 - Feature descriptions

@@ -28,7 +28,19 @@ const commentSchema = new mongoose.Schema({
   isSolution: {
     type: Boolean,
     default: false
-  }
+  },
+  score: {
+    type: Number,
+    default: 0
+  },
+  upvotedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  downvotedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Comment', commentSchema);

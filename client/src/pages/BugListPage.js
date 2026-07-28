@@ -173,7 +173,7 @@ function BugListPage({ isDark = false }) {
   // Filter state — driven from URL params so they're shareable
   const [searchInput, setSearchInput] = useState(searchParams.get('q') || '');
   const [activeTag, setActiveTag] = useState(searchParams.get('tag') || '');
-  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'hot');
+  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'latest');
   const [solvedFilter, setSolvedFilter] = useState(searchParams.get('solved') || '');
 
   // Tag suggestions dropdown
@@ -214,7 +214,7 @@ function BugListPage({ isDark = false }) {
       const sp = {};
       if (searchInput.trim()) sp.q = searchInput.trim();
       if (activeTag) sp.tag = activeTag;
-      if (sortBy !== 'hot') sp.sort = sortBy;
+      if (sortBy !== 'latest') sp.sort = sortBy;
       if (solvedFilter) sp.solved = solvedFilter;
       setSearchParams(sp, { replace: true });
     }, 300);
@@ -238,13 +238,12 @@ function BugListPage({ isDark = false }) {
     setSearchInput('');
     setActiveTag('');
     setSolvedFilter('');
-    setSortBy('hot');
+    setSortBy('latest');
   };
 
   const suggestions = getSuggestions(searchInput, allTags);
   const hasFilters = searchInput || activeTag || solvedFilter;
 
-  const cardBg = isDark ? 'bg-[#1a1a1b] border-[#343536]' : 'bg-white border-gray-200';
   const inputBg = isDark ? 'bg-[#272729] border-[#343536] text-[#d7dadc] placeholder-[#818384]' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400';
 
   return (
@@ -308,9 +307,9 @@ function BugListPage({ isDark = false }) {
         {/* Sort */}
         <span className={`text-xs font-semibold mr-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Sort:</span>
         {[
-          { id: 'hot', label: '🔥 Hot' },
-          { id: 'new', label: '✨ New' },
-          { id: 'top', label: '⭐ Top' },
+          { id: 'latest', label: 'Latest' },
+          { id: 'most-upvoted', label: 'Most upvoted' },
+          { id: 'most-solved', label: 'Most solved' },
         ].map(opt => (
           <button
             key={opt.id}
